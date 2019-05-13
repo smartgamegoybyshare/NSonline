@@ -42,7 +42,6 @@ public class Saddle {
         } else {
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
-            mp.start();
             if (i < 51) { //1~60%
                 String[] boxArr = {"進階術防馬鞍 X 1", "進階防禦馬鞍 X 1", "進階生命馬鞍 X 1"};
                 RandomNumber randomNumber3 = new RandomNumber();
