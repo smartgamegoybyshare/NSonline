@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/homepage"
+            android:icon="@drawable/ns"
+            android:title="@string/app_bar" />
+
+        <item
+            android:id="@+id/testpackages"
+            android:icon="@drawable/pack"
+            android:title="@string/testpackage" />
+
+        <item
+            android:id="@+id/buymycard"
+            android:icon="@drawable/credit_card"
+            android:title="@string/buymycard" />
+
+    </group>
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/bugpage"
+                android:title="@string/bugpage" />
+
+            <item
+                android:id="@+id/tobaha"
+                android:title="@string/baha" />
+
+            <item
+                android:id="@+id/nswiki"
+                android:title="@string/wiki" />
+        </menu>
+    </item>
+
+</menu>

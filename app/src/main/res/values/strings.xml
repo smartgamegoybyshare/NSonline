@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">女神online</string>
+    <string name="app_bar">首頁</string>
+    <string name="buymycard">線上購點</string>
+    <string name="testpackage">福袋測試</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="baha">女神巴哈</string>
+    <string name="bugpage">官方網站</string>
+    <string name="wiki">女神裡wiki</string>
+    <string name="butoon_yes">確定</string>
+    <string name="butoon_no">取消</string>
+    <string name="back">返回</string>
+    <string name="getback">抽</string>
+    <string name="clearback">清除</string>
+</resources>
