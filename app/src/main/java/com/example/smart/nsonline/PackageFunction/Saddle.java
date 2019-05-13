@@ -33,12 +33,6 @@ public class Saddle {
             int i = randomNumber2.getNumber();
             int sum = i % boxArr.length;
             message = boxArr[sum];
-        } else if (random < 100) {   //81~99%
-            String[] boxArr = {"大復活丸 X 1", "愛心 X 1"};
-            RandomNumber randomNumber2 = new RandomNumber();
-            int i = randomNumber2.getNumber();
-            int sum = i % boxArr.length;
-            message = boxArr[sum];
         } else {
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
