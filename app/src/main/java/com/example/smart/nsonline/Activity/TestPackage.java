@@ -38,8 +38,8 @@ public class TestPackage extends AppCompatActivity {
     private ListView listView1, listView2;
     private ArrayAdapter<String> listAdapter, listAdapter2;
     private String[] spinArr = {"裝備盒福袋", "符紋福袋", "機會福袋", "真˙武器福袋", "新制服套裝福袋",
-            "能力臂環福袋", "戀人福袋", "天使福袋", "獸寵胸針福袋"};
-    private Integer[] costArr = {6, 10, 14, 16, 16, 7, 9, 18, 9};
+            "能力臂環福袋", "戀人福袋", "天使福袋", "獸寵胸針福袋", "進階馬鞍福袋"};
+    private Integer[] costArr = {6, 10, 14, 16, 16, 7, 9, 18, 9, 18};
     private String getmessage;
     private int count, chose;
     private List<String> alllist;

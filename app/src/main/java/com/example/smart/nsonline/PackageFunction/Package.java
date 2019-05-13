@@ -38,6 +38,9 @@ public class Package {
         } else if (str.matches("獸寵胸針福袋")) {
             Monster monster = new Monster();
             message = monster.getMessage(context);
+        } else if (str.matches("進階馬鞍福袋")) {
+            Saddle saddle = new Saddle();
+            message = saddle.getMessage(context);
         }
 
         return message;
