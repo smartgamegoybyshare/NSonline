@@ -20,20 +20,22 @@
             android:title="@string/buymycard" />
 
     </group>
-    <item android:title="">
-        <menu>
-            <item
-                android:id="@+id/bugpage"
-                android:title="@string/bugpage" />
+    <group
+        android:id="@+id/nav_commnunicate"
+        android:title="">
 
-            <item
-                android:id="@+id/tobaha"
-                android:title="@string/baha" />
+        <item
+            android:id="@+id/bugpage"
+            android:title="@string/bugpage" />
 
-            <item
-                android:id="@+id/nswiki"
-                android:title="@string/wiki" />
-        </menu>
-    </item>
+        <item
+            android:id="@+id/tobaha"
+            android:title="@string/baha" />
+
+        <item
+            android:id="@+id/nswiki"
+            android:title="@string/wiki" />
+
+    </group>
 
 </menu>
