@@ -16,12 +16,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
-
 import com.example.smart.nsonline.PackageFunction.Package;
 import com.example.smart.nsonline.R;
 import com.example.smart.nsonline.Style.ButtonStyle;
-
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,8 +35,8 @@ public class TestPackage extends AppCompatActivity {
     private ListView listView1, listView2;
     private ArrayAdapter<String> listAdapter, listAdapter2;
     private String[] spinArr = {"裝備盒福袋", "符紋福袋", "機會福袋", "真˙武器福袋", "新制服套裝福袋",
-            "能力臂環福袋", "戀人福袋", "天使福袋", "獸寵胸針福袋", "進階馬鞍福袋"};
-    private Integer[] costArr = {6, 10, 14, 16, 16, 7, 9, 18, 9, 18};
+            "能力臂環福袋", "戀人福袋", "天使福袋", "獸寵胸針福袋", "進階馬鞍福袋", "琉璃福袋", "牛仔福袋"};
+    private Integer[] costArr = {6, 10, 14, 16, 16, 7, 9, 18, 9, 18, 9, 8};
     private String getmessage;
     private int count, chose;
     private List<String> alllist;
@@ -49,15 +46,19 @@ public class TestPackage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
-        /*MediaPlayer mp = MediaPlayer.create(this, R.raw.playing);
-        mp.setLooping(true);
-        mp.start();*/
         alllist = new ArrayList<>();
         countList = new ArrayList<>();
         alllist.clear();
         countList.clear();
+        new Thread(mpplayer).start();   //程式開啟即撥放背景音樂，縮放回來後亦同
         startpage();
     }
+
+    private Runnable mpplayer = () -> {
+            mp = MediaPlayer.create(TestPackage.this, R.raw.playing);
+            mp.setLooping(true);
+            mp.start();
+    };
 
     private void startpage() {
         setContentView(R.layout.showpackage);
@@ -105,7 +106,7 @@ public class TestPackage extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 chose = position;
-                getmessage = spinArr[position];
+                getmessage = spinArr[position]; //將getmessage設定為選取之spinner元素
             }
 
             @Override
@@ -118,8 +119,8 @@ public class TestPackage extends AppCompatActivity {
             vibrator.vibrate(100);
             listAdapter2.clear();
             listAdapter2.notifyDataSetChanged();
-            String currentDateTimeString = DateFormat.getTimeInstance().format(new Date());
-            String message = aPackage.getMessage(this, getmessage);
+            String currentDateTimeString = DateFormat.getTimeInstance().format(new Date()); //取得當前裝置時間
+            String message = aPackage.getMessage(this, getmessage);    //取得獲取之獎品字串
             listAdapter.add("[" + currentDateTimeString + "] : " + "恭喜獲得 : " + message);
             listView1.smoothScrollToPosition(listAdapter.getCount() - 1);
             listAdapter2.add("");
@@ -160,6 +161,16 @@ public class TestPackage extends AppCompatActivity {
         });
     }
 
+    private void stopPlaying() {
+        if (mp != null) {
+            mp.stop();
+            mp.release();
+            mp = null;
+        }
+    }
+
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {   //toolbar menu item
         // Handle action bar item clicks here. The action bar will
@@ -184,8 +195,10 @@ public class TestPackage extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Log.d(TAG, "LANDSCAPE");
             // land do nothing is ok
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Log.d(TAG, "PORTRAIT");
             // port do nothing is ok
         }
     }
@@ -194,41 +207,39 @@ public class TestPackage extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy()");
+        stopPlaying();  //離開此生命週期即停止撥放
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause()");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if(!mp.isPlaying()) {   //如果音樂已暫停即繼續撥放
+            mp.start();
+        }
+        Log.d(TAG, "onResume()");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "onStop()");
+        if(mp.isPlaying()){ //縮小視窗即停止背景撥放
+            mp.pause();
+        }
     }
 
     public boolean onKeyDown(int key, KeyEvent event) {
         switch (key) {
             case KeyEvent.KEYCODE_SEARCH:
                 break;
-            case KeyEvent.KEYCODE_BACK: {
+            case KeyEvent.KEYCODE_BACK: {   //上一頁即返回FirstActivity
                 vibrator.vibrate(100);
-                /*try {
-                    if (mp != null && mp.isPlaying()) {
-                        mp.pause();
-                        mp.stop();
-                        mp.reset();
-                        mp.release();
-                        mp = null;
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "問題在哪?" + e);
-                    e.printStackTrace();
-                }*/
                 Intent intent = new Intent(this, FirstActivity.class);
                 startActivity(intent);
                 finish();

@@ -1,14 +1,17 @@
 package com.example.smart.nsonline.PackageFunction;
 
 import android.content.Context;
+import android.util.Log;
 
 public class Package {
+
+    private String TAG = "Package";
 
     public Package() {
         super();
     }
 
-    public String getMessage(Context context, String str) {
+    public String getMessage(Context context, String str) { //str即為spinner選取之元素
         String message = "";
 
         if (str.matches("裝備盒福袋")) {
@@ -41,8 +44,15 @@ public class Package {
         } else if (str.matches("進階馬鞍福袋")) {
             Saddle saddle = new Saddle();
             message = saddle.getMessage(context);
+        } else if (str.matches("琉璃福袋")) {
+            Rock rock = new Rock();
+            message = rock.getMessage(context);
+        } else if (str.matches("牛仔福袋")) {
+            CowBoy cowBoy = new CowBoy();
+            message = cowBoy.getMessage(context);
         }
 
+        Log.d(TAG, "message = " + message);
         return message;
     }
 }
