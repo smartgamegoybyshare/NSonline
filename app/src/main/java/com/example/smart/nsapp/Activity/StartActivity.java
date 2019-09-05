@@ -3,15 +3,14 @@ package com.example.smart.nsapp.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
+import androidx.appcompat.app.AppCompatActivity;
 import com.example.smart.nsapp.R;
-
 import pl.droidsonroids.gif.GifImageView;
 
 public class StartActivity extends AppCompatActivity {
@@ -29,6 +28,8 @@ public class StartActivity extends AppCompatActivity {
         //隱藏狀態欄
         getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //隱藏底部HOME工具列
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         setContentView(R.layout.startview);
 
         GifImageView gifImageView = findViewById(R.id.activity_gif_giv);

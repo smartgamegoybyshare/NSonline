@@ -2,10 +2,10 @@ package com.example.smart.nsapp.Style;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
-import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Button;
+import androidx.core.content.ContextCompat;
 import com.example.smart.nsapp.R;
 import com.example.smart.nsapp.Fuction.Screen;
 

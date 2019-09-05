@@ -9,4 +9,6 @@
     <color name="textcolor">#000000</color>
     <color name="colortouch_btn">#ff9191</color>
     <color name="spinnerstyle">#999999</color>
+    <color name="progressColor">#72C2FF</color>
+    <color name="colorWhite">#FFFFFF</color>
 </resources>

@@ -1,21 +1,16 @@
 package com.example.smart.nsapp.Activity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.Vibrator;
-import android.support.annotation.NonNull;
-import android.support.design.widget.*;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -23,7 +18,30 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
+
 import com.example.smart.nsapp.R;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.tabs.TabLayout;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +55,8 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     private Vibrator vibrator;
     private List<View> list;
     private MediaPlayer mp = new MediaPlayer();
-    private String[] tableList = {"影片欣賞"};
+    private String[] tableList = {"影片欣賞", "練功地"};
+    private Handler checkHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +65,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         list = new ArrayList<>();
         list.clear();
         new Thread(mpplayer).start();   //程式開啟即撥放背景音樂，縮放回來後亦同
+        new Thread(versioncontrol).start();
         startpage();
     }
 
@@ -61,11 +81,68 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         TabLayout tabLayout = findViewById(R.id.tablayout);
         ViewPager viewPager = findViewById(R.id.viewpager);
 
-        for(int i = 0; i < tableList.length; i++){
+        for (int i = 0; i < tableList.length; i++) {
             tabLayout.addTab(tabLayout.newTab());
             Objects.requireNonNull(tabLayout.getTabAt(i)).setText(tableList[i]);
             //list.add(nameView.setView(this, nameList, vibrator));
         }
+
+
+    }
+
+    private Runnable versioncontrol = () -> {
+        try {
+            URL url = new URL("https://aniwantsmart.com/NSonline/version.json");
+            HttpURLConnection urlCon = (HttpURLConnection) url.openConnection();
+            urlCon.setConnectTimeout(2000);
+            InputStream uin = urlCon.getInputStream();
+            BufferedReader in = new BufferedReader(new InputStreamReader(uin));
+            boolean more = true;
+            StringBuilder line = new StringBuilder();
+            for (; more; ) {
+                String getline = in.readLine();
+                Log.e(TAG, "getline = " + getline);
+                if (getline != null) {
+                    line.append(getline);
+                } else {
+                    more = false;
+                }
+            }
+            Log.e(TAG, "line = " + line);
+            JSONObject jsonObject = new JSONObject(line.toString());
+            Log.e(TAG, "jsonObject = " + jsonObject);
+            String thisversion = getVersionName(this);
+            String version = jsonObject.getString("version");
+            if (!version.matches(thisversion)) {
+                checkHandler.post(() -> {
+                    new AlertDialog.Builder(this)
+                            .setTitle("女神App" + thisversion)
+                            .setIcon(R.drawable.ns)
+                            .setMessage("偵測到有新版本" + version + "\n現在要更新嗎?")
+                            .setPositiveButton("確定", (dialog, which) -> {
+                                getNewVersion();
+                                finish();
+                            })
+                            .setNegativeButton("取消", (dialog, which) -> {
+                                // TODO Auto-generated method stub
+                            }).show();
+                });
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+    };
+
+    private void getNewVersion() {
+        Uri uri = Uri.parse("https://aniwantsmart.com/NSonline/NSonline.apk");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
     }
 
     private Runnable mpplayer = () -> {
@@ -73,6 +150,14 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         mp.setLooping(true);
         mp.start();
     };
+
+    public String getVersionName(Context context) throws PackageManager.NameNotFoundException {
+        // 获取packagemanager的实例
+        PackageManager packageManager = context.getPackageManager();
+        // getPackageName()是你当前类的包名，0代表是获取版本信息
+        PackageInfo packInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+        return packInfo.versionName;
+    }
 
     private void stopPlaying() {
         if (mp != null) {
@@ -147,26 +232,34 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
             return true;
         } else if (id == R.id.buymycard) {
             vibrator.vibrate(100);
-            Uri uri = Uri.parse("https://www.mycard520.com/zh-tw/MicroPayment");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            String url = "https://www.mycard520.com/zh-tw/MicroPayment";
+            Intent intent = new Intent(this, WebviewActivity.class);
+            intent.putExtra("title", menuItem.getTitle());
+            intent.putExtra("url", url);
             startActivity(intent);
             return true;
         } else if (id == R.id.tobaha) {
             vibrator.vibrate(100);
-            Uri uri = Uri.parse("https://forum.gamer.com.tw/A.php?bsn=13013");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            String url = "https://forum.gamer.com.tw/A.php?bsn=13013";
+            Intent intent = new Intent(this, WebviewActivity.class);
+            intent.putExtra("title", menuItem.getTitle());
+            intent.putExtra("url", url);
             startActivity(intent);
             return true;
         } else if (id == R.id.bugpage) {
             vibrator.vibrate(100);
-            Uri uri = Uri.parse("https://ns.chinesegamer.net/");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            String url = "https://ns.chinesegamer.net/";
+            Intent intent = new Intent(this, WebviewActivity.class);
+            intent.putExtra("title", menuItem.getTitle());
+            intent.putExtra("url", url);
             startActivity(intent);
             return true;
         } else if (id == R.id.nswiki) {
             vibrator.vibrate(100);
-            Uri uri = Uri.parse("https://nsura.wiki.fc2.com/");
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            String url = "https://nsura.wiki.fc2.com/";
+            Intent intent = new Intent(this, WebviewActivity.class);
+            intent.putExtra("title", menuItem.getTitle());
+            intent.putExtra("url", url);
             startActivity(intent);
             return true;
         }
@@ -187,7 +280,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

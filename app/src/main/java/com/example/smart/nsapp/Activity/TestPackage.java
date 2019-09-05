@@ -5,8 +5,6 @@ import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -16,6 +14,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import com.example.smart.nsapp.PackageFunction.Package;
 import com.example.smart.nsapp.R;
 import com.example.smart.nsapp.Style.ButtonStyle;
@@ -100,7 +100,7 @@ public class TestPackage extends AppCompatActivity {
             }
         };
 
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_style);    //R.layout.spinner_style
+        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_stytle);    //R.layout.spinner_style
         spinner.setAdapter(spinnerArrayAdapter);
         spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
             @Override
