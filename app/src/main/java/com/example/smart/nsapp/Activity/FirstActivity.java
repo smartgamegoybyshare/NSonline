@@ -29,6 +29,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.smart.nsapp.R;
+import com.example.smart.nsapp.ViewPager.SetPagerAdapter;
+import com.example.smart.nsapp.ViewPager.SetViewPager;
+import com.example.smart.nsapp.ViewPager.VideoView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
@@ -55,7 +58,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     private Vibrator vibrator;
     private List<View> list;
     private MediaPlayer mp = new MediaPlayer();
-    private String[] tableList = {"影片欣賞", "練功地"};
+    private String[] tableList = {"影片欣賞"};
     private Handler checkHandler = new Handler();
 
     @Override
@@ -81,13 +84,30 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         TabLayout tabLayout = findViewById(R.id.tablayout);
         ViewPager viewPager = findViewById(R.id.viewpager);
 
-        for (int i = 0; i < tableList.length; i++) {
+        SetViewPager setViewPager = new SetViewPager();
+        VideoView videoView = new VideoView(this);
+        SetPagerAdapter setPagerAdapter = new SetPagerAdapter();
+        List<View> viewList = new ArrayList<>();
+        List<String> nameList = new ArrayList<>();
+        viewList.clear();
+        nameList.clear();
+        nameList.add("影片欣賞");
+        nameList.add("練功地");
+
+        tabLayout.addTab(tabLayout.newTab());
+        Objects.requireNonNull(tabLayout.getTabAt(0)).setText(tableList[0]);
+        viewList.add(videoView.setView(vibrator));
+
+        for (int i = 1; i < tableList.length; i++) {
             tabLayout.addTab(tabLayout.newTab());
             Objects.requireNonNull(tabLayout.getTabAt(i)).setText(tableList[i]);
-            //list.add(nameView.setView(this, nameList, vibrator));
+            //viewList.add(setViewPager.setView(this, vibrator));
         }
 
-
+        setPagerAdapter.setView(viewList);
+        viewPager.setAdapter(setPagerAdapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
     }
 
     private Runnable versioncontrol = () -> {
@@ -284,6 +304,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         super.onConfigurationChanged(newConfig);
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
             // land do nothing is ok
         } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             // port do nothing is ok
