@@ -2,21 +2,25 @@ package com.example.smart.nsapp.PackageFunction;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Vibrator;
 import com.example.smart.nsapp.Fuction.RandomNumber;
 import com.example.smart.nsapp.R;
 
 public class Chance {
 
     private String TAG = "Chance";
-    private MediaPlayer mp = new MediaPlayer();
+    private Context context;
+    private Vibrator vibrator;
 
     public Chance() {
         super();
     }
 
-    public String getMessage(Context context) {
-        mp = MediaPlayer.create(context, R.raw.winner);
-        String message = "";
+    public String getMessage(Context context, Vibrator vibrator) {
+        this.context = context;
+        this.vibrator = vibrator;
+
+        String message;
         int random;
         RandomNumber randomNumber = new RandomNumber();
         random = randomNumber.getNumber();
@@ -43,14 +47,23 @@ public class Chance {
             } else if (i < 71) {  //41~70%
                 message = boxArr[1];
             } else if (i < 91) {  //71~90%
-                mp.start();
+                new Thread(playMP).start();
                 message = boxArr[2];
             } else {
-                mp.start();
+                new Thread(playMP).start();
                 message = boxArr[3];
             }
         }
 
         return message;
     }
+
+    private Runnable playMP = new Runnable() {
+        @Override
+        public void run() {
+            MediaPlayer mp = MediaPlayer.create(context, R.raw.winner);
+            mp.start();
+            vibrator.vibrate(100);
+        }
+    };
 }

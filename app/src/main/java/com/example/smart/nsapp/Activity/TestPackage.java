@@ -116,11 +116,10 @@ public class TestPackage extends AppCompatActivity {
 
 
         b1.setOnClickListener(v -> {
-            vibrator.vibrate(100);
             listAdapter2.clear();
             listAdapter2.notifyDataSetChanged();
             String currentDateTimeString = DateFormat.getTimeInstance().format(new Date()); //取得當前裝置時間
-            String message = aPackage.getMessage(this, getmessage);    //取得獲取之獎品字串
+            String message = aPackage.getMessage(this, getmessage, vibrator);    //取得獲取之獎品字串
             listAdapter.add("[" + currentDateTimeString + "] : " + "恭喜獲得 : " + message);
             listView1.smoothScrollToPosition(listAdapter.getCount() - 1);
             listAdapter2.add("");
@@ -150,7 +149,6 @@ public class TestPackage extends AppCompatActivity {
         });
 
         b2.setOnClickListener(v -> {
-            vibrator.vibrate(100);
             count = 1;
             countList.clear();
             alllist.clear();

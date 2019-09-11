@@ -2,21 +2,25 @@ package com.example.smart.nsapp.PackageFunction;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Vibrator;
 import com.example.smart.nsapp.Fuction.RandomNumber;
 import com.example.smart.nsapp.R;
 
 public class Rock {
 
     private String TAG = "Rock";
-    private MediaPlayer mp = new MediaPlayer();
+    private Context context;
+    private Vibrator vibrator;
 
     public Rock() {
         super();
     }
 
-    public String getMessage(Context context) {
-        mp = MediaPlayer.create(context, R.raw.winner);
-        String message = "";
+    public String getMessage(Context context, Vibrator vibrator) {
+        this.context = context;
+        this.vibrator = vibrator;
+
+        String message;
         int random;
         RandomNumber randomNumber = new RandomNumber();
         random = randomNumber.getNumber();
@@ -37,7 +41,7 @@ public class Rock {
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
             String[] boxArr = {"火琉璃 X 1", "水琉璃 X 1"};
-            mp.start();
+            new Thread(playMP).start();
             if (i < 51) { //1~50%
                 message = boxArr[0];
             } else {  //51~100%
@@ -47,4 +51,13 @@ public class Rock {
 
         return message;
     }
+
+    private Runnable playMP = new Runnable() {
+        @Override
+        public void run() {
+            MediaPlayer mp = MediaPlayer.create(context, R.raw.winner);
+            mp.start();
+            vibrator.vibrate(100);
+        }
+    };
 }

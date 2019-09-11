@@ -2,21 +2,25 @@ package com.example.smart.nsapp.PackageFunction;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Vibrator;
 import com.example.smart.nsapp.Fuction.RandomNumber;
 import com.example.smart.nsapp.R;
 
 public class Saddle {
 
     private String TAG = "Saddle";
-    private MediaPlayer mp = new MediaPlayer();
+    private Context context;
+    private Vibrator vibrator;
 
     public Saddle() {
         super();
     }
 
-    public String getMessage(Context context) {
-        mp = MediaPlayer.create(context, R.raw.winner);
-        String message = "";
+    public String getMessage(Context context, Vibrator vibrator) {
+        this.context = context;
+        this.vibrator = vibrator;
+
+        String message;
         int random;
         RandomNumber randomNumber = new RandomNumber();
         random = randomNumber.getNumber();
@@ -43,11 +47,11 @@ public class Saddle {
                 int sum = j % boxArr.length;
                 message = boxArr[sum];
             } else if (i < 81) {  //61~90%
-                mp.start();
+                new Thread(playMP).start();
                 String[] boxArr = {"進階敏捷馬鞍 X 1"};
                 message = boxArr[0];
             } else {
-                mp.start();
+                new Thread(playMP).start();
                 String[] boxArr = {"進階睿智馬鞍 X 1", "進階猛擊馬鞍 X 1"};
                 RandomNumber randomNumber3 = new RandomNumber();
                 int j = randomNumber3.getNumber();
@@ -61,4 +65,13 @@ public class Saddle {
 
         return message;
     }
+
+    private Runnable playMP = new Runnable() {
+        @Override
+        public void run() {
+            MediaPlayer mp = MediaPlayer.create(context, R.raw.winner);
+            mp.start();
+            vibrator.vibrate(100);
+        }
+    };
 }

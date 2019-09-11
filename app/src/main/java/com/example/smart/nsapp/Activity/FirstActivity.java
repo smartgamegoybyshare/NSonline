@@ -1,14 +1,21 @@
 package com.example.smart.nsapp.Activity;
 
+import android.Manifest;
+import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.os.Vibrator;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -18,16 +25,23 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.smart.nsapp.Fuction.DownloadCompleteReceiver;
+import com.example.smart.nsapp.InstallAPK.DownloadStatus;
+import com.example.smart.nsapp.InstallAPK.FinishListener;
 import com.example.smart.nsapp.R;
 import com.example.smart.nsapp.ViewPager.SetPagerAdapter;
 import com.example.smart.nsapp.ViewPager.SetViewPager;
@@ -39,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -49,31 +64,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class FirstActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class FirstActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        FinishListener {
 
     private String TAG = "FirstActivity";
+    private DownloadStatus downloadStatus = new DownloadStatus();
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private Menu menu;
     private boolean music = true;
     private NavigationView navigationView;
     private Vibrator vibrator;
     private List<View> list;
     private MediaPlayer mp = new MediaPlayer();
-    private String[] tableList = {"影片欣賞"};
+    private String[] tableList = {"官方網站"};
     private Handler checkHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        //隱藏狀態欄
         vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
         list = new ArrayList<>();
         list.clear();
-        new Thread(mpplayer).start();   //程式開啟即撥放背景音樂，縮放回來後亦同
-        new Thread(versioncontrol).start();
         startpage();
     }
 
     private void startpage() {
         setContentView(R.layout.activity_main);
+
+        downloadStatus.setListener(this);
+        new Thread(mpplayer).start();   //程式開啟即撥放背景音樂，縮放回來後亦同
+        new Thread(versioncontrol).start();
 
         Toolbar myToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(myToolbar);
@@ -108,6 +135,21 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         viewPager.setAdapter(setPagerAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+
+        /*final String CHANNEL_ID = "channel_id_1";
+        final String CHANNEL_NAME = "channel_name_1";
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID,
+                    CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setContentTitle("Download")
+                .setContentText("Download in progress")
+                .setSmallIcon(R.drawable.notification_download);
+        notificationManager.notify(1000, builder.build());
+        Log.e(TAG,"已出現通知");*/
     }
 
     private Runnable versioncontrol = () -> {
@@ -140,8 +182,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
                             .setIcon(R.drawable.ns)
                             .setMessage("偵測到有新版本" + version + "\n現在要更新嗎?")
                             .setPositiveButton("確定", (dialog, which) -> {
-                                getNewVersion();
-                                finish();
+                                requeststorage();
                             })
                             .setNegativeButton("取消", (dialog, which) -> {
                                 // TODO Auto-generated method stub
@@ -160,10 +201,38 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     };
 
     private void getNewVersion() {
-        Uri uri = Uri.parse("https://aniwantsmart.com/NSonline/NSonline.apk");
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
+        String url = "https://aniwantsmart.com/NSonline/NSonline.apk";
+        downloadManager(url);
+        /*DownloadCompleteReceiver receiver = new DownloadCompleteReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        context.registerReceiver(receiver, intentFilter);*/
     }
+
+    private void downloadManager(String url) {
+        Log.e(TAG, "url = " + url);
+        String fileName = url.substring(url.lastIndexOf("/") + 1);
+        Log.e(TAG, "fileName = " + fileName);
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+        DownloadManager dm = (DownloadManager) this.getSystemService(DOWNLOAD_SERVICE);
+        if (dm != null) {
+            dm.enqueue(request);
+        }
+        Toast.makeText(this, "開始下載",
+                //To notify the Client that the file is being downloaded
+                Toast.LENGTH_SHORT).show();
+
+        // 使用
+        DownloadCompleteReceiver receiver = new DownloadCompleteReceiver();
+        receiver.setListener(downloadStatus);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        this.registerReceiver(receiver, intentFilter);
+    }
+
 
     private Runnable mpplayer = () -> {
         mp = MediaPlayer.create(FirstActivity.this, R.raw.homepage);
@@ -177,6 +246,25 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         // getPackageName()是你当前类的包名，0代表是获取版本信息
         PackageInfo packInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
         return packInfo.versionName;
+    }
+
+    private void requeststorage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                //未取得權限，向使用者要求允許權限
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
+                        REQUEST_EXTERNAL_STORAGE);
+            } else {
+                getNewVersion();
+                //已有權限，可進行工作
+            }
+        } else {
+            getNewVersion();
+        }
     }
 
     private void stopPlaying() {
@@ -210,6 +298,20 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         this.menu = menu;
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_EXTERNAL_STORAGE: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requeststorage();
+                } else {
+                    finish();
+                }
+            }
+            break;
+        }
     }
 
     @Override
@@ -266,9 +368,17 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
             intent.putExtra("url", url);
             startActivity(intent);
             return true;
-        } else if (id == R.id.bugpage) {
+        } else if (id == R.id.newNS) {
             vibrator.vibrate(100);
-            String url = "https://ns.chinesegamer.net/";
+            String url = "https://nsc.chinesegamer.net";
+            Intent intent = new Intent(this, WebviewActivity.class);
+            intent.putExtra("title", menuItem.getTitle());
+            intent.putExtra("url", url);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.viewpage) {
+            vibrator.vibrate(100);
+            String url = "https://aniwantsmart.com/NSonline/OP/nsmv.php";
             Intent intent = new Intent(this, WebviewActivity.class);
             intent.putExtra("title", menuItem.getTitle());
             intent.putExtra("url", url);
@@ -369,5 +479,33 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
                 return false;
         }
         return false;
+    }
+
+    @Override
+    public void isFinsish(String uri, String type) {
+        Log.e(TAG, "回來了");
+        try {
+            Intent handlerIntent = new Intent();
+            Log.e(TAG, "uri = " + uri);
+            Log.e(TAG, "type = " + type);
+            if (type.contains("application")) {
+                File mFile = new File(Objects.requireNonNull(Uri.parse(uri).getPath()));
+                String downloadFilePath = mFile.getAbsolutePath();
+                Uri fileuri = Uri.fromFile(new File(downloadFilePath));
+                handlerIntent.setAction(Intent.ACTION_VIEW);
+                handlerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                handlerIntent.setDataAndType(fileuri, type);
+            } else {
+                Log.e(TAG, "自動開啟影音");
+                /*File mFile = new File(Objects.requireNonNull(Uri.parse(uri).getPath()));
+                String downloadFilePath = mFile.getAbsolutePath();
+                Uri fileuri = Uri.parse(downloadFilePath);
+                handlerIntent.setAction(Intent.ACTION_VIEW);
+                handlerIntent.setDataAndType(fileuri, type);*/
+            }
+            startActivity(handlerIntent);
+        } catch (ActivityNotFoundException e) {
+            Log.e(TAG, "e = " + e);
+        }
     }
 }

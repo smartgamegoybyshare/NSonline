@@ -2,21 +2,25 @@ package com.example.smart.nsapp.PackageFunction;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Vibrator;
 import com.example.smart.nsapp.Fuction.RandomNumber;
 import com.example.smart.nsapp.R;
 
 public class AbilityArm {
 
     private String TAG = "AbilityArm";
-    private MediaPlayer mp = new MediaPlayer();
+    private Context context;
+    private Vibrator vibrator;
 
     public AbilityArm(){
         super();
     }
 
-    public String getMessage(Context context) {
-        mp = MediaPlayer.create(context, R.raw.winner);
-        String message = "";
+    public String getMessage(Context context, Vibrator vibrator) {
+        this.context = context;
+        this.vibrator = vibrator;
+
+        String message;
         int random;
         RandomNumber randomNumber = new RandomNumber();
         random = randomNumber.getNumber();
@@ -38,7 +42,7 @@ public class AbilityArm {
             String[] boxArr = {"藍霞之環 X 1", "強襲之環 X 1", "炙晶之環 X 1"};
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
-            mp.start();
+            new Thread(playMP).start();
             if (i < 61) { //1~60%
                 message = boxArr[0];
             } else if (i < 91) {  //61~90%
@@ -50,4 +54,13 @@ public class AbilityArm {
 
         return message;
     }
+
+    private Runnable playMP = new Runnable() {
+        @Override
+        public void run() {
+            MediaPlayer mp = MediaPlayer.create(context, R.raw.winner);
+            mp.start();
+            vibrator.vibrate(100);
+        }
+    };
 }

@@ -207,6 +207,7 @@ public class WebviewActivity extends AppCompatActivity {
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+        request.setTitle("下载");
         DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         if (dm != null) {
             dm.enqueue(request);
@@ -214,6 +215,7 @@ public class WebviewActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "即將開始下載",
                 //To notify the Client that the file is being downloaded
                 Toast.LENGTH_LONG).show();
+
     }
 
     private void requeststorage(String url) {

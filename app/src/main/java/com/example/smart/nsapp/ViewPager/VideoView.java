@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -26,15 +27,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.example.smart.nsapp.Fuction.DownloadCompleteReceiver;
 import com.example.smart.nsapp.Fuction.Loading;
+import com.example.smart.nsapp.InstallAPK.DownloadStatus;
 import com.example.smart.nsapp.R;
-
 import static android.content.Context.DOWNLOAD_SERVICE;
 
 public class VideoView {
@@ -47,15 +46,16 @@ public class VideoView {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     private Loading loading;
     private Context context;
+    private long downloadId;
 
     public VideoView(Context context) {
         this.context = context;
         loading = new Loading(context);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     public View setView(Vibrator vibrator) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-
 
         @SuppressLint("InflateParams")
         View view = layoutInflater.inflate(R.layout.videoview, null);
@@ -77,6 +77,7 @@ public class VideoView {
                     .replace("android", "") + " cldc");
         }
         webview.getSettings().setJavaScriptEnabled(true);
+        webview.getSettings().setDomStorageEnabled(true);
         webview.getSettings().setSupportZoom(true); // 支持缩放
         // 设置出现缩放工具
         webview.getSettings().setBuiltInZoomControls(true);
@@ -92,17 +93,12 @@ public class VideoView {
         webview.getSettings().setAllowFileAccessFromFileURLs(true);
         webview.getSettings().setBlockNetworkImage(false);//不阻塞网络图片
         webview.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        webview.setDownloadListener(new DownloadListener() {
-            @Override
-            public void onDownloadStart(String url, String userAgent,
-                                        String contentDisposition, String mimetype,
-                                        long contentLength) {
-                Log.e(TAG, "userAgent = " + userAgent);
-                Log.e(TAG, "contentDisposition = " + contentDisposition);
-                Log.e(TAG, "mimetype = " + mimetype);
-                Log.e(TAG, "contentLength = " + contentLength);
-                requeststorage(url);
-            }
+        webview.setDownloadListener((url, userAgent1, contentDisposition, mimetype, contentLength) -> {
+            Log.e(TAG, "userAgent = " + userAgent1);
+            Log.e(TAG, "contentDisposition = " + contentDisposition);
+            Log.e(TAG, "mimetype = " + mimetype);
+            Log.e(TAG, "contentLength = " + contentLength);
+            requeststorage(url);
         });
         webview.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, String url) { //  重寫此方法表明點選網頁裡面的連結還是在當前的webview裡跳轉,不跳到瀏覽器那邊
@@ -126,7 +122,7 @@ public class VideoView {
                 Log.e(TAG, "載入完畢");
             }
         });
-        webview.setWebChromeClient(new WebChromeClient(){
+        webview.setWebChromeClient(new WebChromeClient() {
 
             private View mCustomView;
             private WebChromeClient.CustomViewCallback mCustomViewCallback;
@@ -141,7 +137,7 @@ public class VideoView {
             }
 
             public void onHideCustomView() {
-                ((FrameLayout)getActivity(context).getWindow().getDecorView()).removeView(this.mCustomView);
+                ((FrameLayout) getActivity(context).getWindow().getDecorView()).removeView(this.mCustomView);
                 this.mCustomView = null;
                 getActivity(context).getWindow().getDecorView().setSystemUiVisibility(this.mOriginalSystemUiVisibility);
                 getActivity(context).setRequestedOrientation(this.mOriginalOrientation);
@@ -158,11 +154,11 @@ public class VideoView {
                 this.mOriginalSystemUiVisibility = getActivity(context).getWindow().getDecorView().getSystemUiVisibility();
                 this.mOriginalOrientation = getActivity(context).getRequestedOrientation();
                 this.mCustomViewCallback = paramCustomViewCallback;
-                ((FrameLayout)getActivity(context).getWindow().getDecorView()).addView(this.mCustomView, new FrameLayout.LayoutParams(-1, -1));
+                ((FrameLayout) getActivity(context).getWindow().getDecorView()).addView(this.mCustomView, new FrameLayout.LayoutParams(-1, -1));
                 getActivity(context).getWindow().getDecorView().setSystemUiVisibility(3846);
             }
         });
-        webview.loadUrl("https://aniwantsmart.com/NSonline/OP/nsmv.php");
+        webview.loadUrl("https://ns.chinesegamer.net/");
 
         return view;
     }
@@ -184,7 +180,8 @@ public class VideoView {
     private static Activity getActivity(Context context) {
         if (context == null) return null;
         if (context instanceof Activity) return (Activity) context;
-        if (context instanceof ContextWrapper) return getActivity(((ContextWrapper)context).getBaseContext());
+        if (context instanceof ContextWrapper)
+            return getActivity(((ContextWrapper) context).getBaseContext());
         return null;
     }
 
@@ -211,26 +208,28 @@ public class VideoView {
         }
     }
 
-    private void downloadManager(String url){
+    private void downloadManager(String url) {
         Log.e(TAG, "url = " + url);
         String fileName = url.substring(url.lastIndexOf("/") + 1);
         Log.e(TAG, "fileName = " + fileName);
-        DownloadManager.Request request = new DownloadManager.Request(
-                Uri.parse(url));
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED); //Notify client once download is completed!
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
         DownloadManager dm = (DownloadManager) getActivity(context).getSystemService(DOWNLOAD_SERVICE);
         if (dm != null) {
-            dm.enqueue(request);
+            downloadId = dm.enqueue(request);
         }
+        Log.e(TAG, "downloadId = " + downloadId);
         Toast.makeText(context, "開始下載",
                 //To notify the Client that the file is being downloaded
                 Toast.LENGTH_SHORT).show();
-        // 使用
+
+        /*// 使用
         DownloadCompleteReceiver receiver = new DownloadCompleteReceiver();
+        receiver.setListener(downloadStatus);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        context.registerReceiver(receiver, intentFilter);
+        context.registerReceiver(receiver, intentFilter);*/
     }
 }
