@@ -43,6 +43,7 @@ import com.example.smart.nsapp.Fuction.DownloadCompleteReceiver;
 import com.example.smart.nsapp.InstallAPK.DownloadStatus;
 import com.example.smart.nsapp.InstallAPK.FinishListener;
 import com.example.smart.nsapp.R;
+import com.example.smart.nsapp.ViewPager.CombineView;
 import com.example.smart.nsapp.ViewPager.SetPagerAdapter;
 import com.example.smart.nsapp.ViewPager.SetViewPager;
 import com.example.smart.nsapp.ViewPager.VideoView;
@@ -76,7 +77,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     private Vibrator vibrator;
     private List<View> list;
     private MediaPlayer mp = new MediaPlayer();
-    private String[] tableList = {"官方網站"};
+    private String[] tableList = {"官方網站", "合成製作"};
     private Handler checkHandler = new Handler();
 
     @Override
@@ -111,25 +112,25 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         TabLayout tabLayout = findViewById(R.id.tablayout);
         ViewPager viewPager = findViewById(R.id.viewpager);
 
-        SetViewPager setViewPager = new SetViewPager();
         VideoView videoView = new VideoView(this);
+        CombineView combineView = new CombineView(this);
         SetPagerAdapter setPagerAdapter = new SetPagerAdapter();
         List<View> viewList = new ArrayList<>();
-        List<String> nameList = new ArrayList<>();
         viewList.clear();
-        nameList.clear();
-        nameList.add("影片欣賞");
-        nameList.add("練功地");
 
         tabLayout.addTab(tabLayout.newTab());
         Objects.requireNonNull(tabLayout.getTabAt(0)).setText(tableList[0]);
         viewList.add(videoView.setView(vibrator));
 
-        for (int i = 1; i < tableList.length; i++) {
+        tabLayout.addTab(tabLayout.newTab());
+        Objects.requireNonNull(tabLayout.getTabAt(1)).setText(tableList[1]);
+        viewList.add(combineView.setView(vibrator));
+
+        /*for (int i = 1; i < tableList.length; i++) {
             tabLayout.addTab(tabLayout.newTab());
             Objects.requireNonNull(tabLayout.getTabAt(i)).setText(tableList[i]);
             //viewList.add(setViewPager.setView(this, vibrator));
-        }
+        }*/
 
         setPagerAdapter.setView(viewList);
         viewPager.setAdapter(setPagerAdapter);
