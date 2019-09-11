@@ -31,8 +31,8 @@ public class CowBoy {
             int i = randomNumber2.getNumber();
             int sum = i % boxArr.length;
             message = boxArr[sum];
-        } else if (random < 99) {   //71~98%
-            String[] boxArr = {"70%經驗藥水 X 1", "回復卷軸 X 1", "大復活丸 X 1", "防壞裝木偶 X 1", "獸寵馬鐙 X 1"};
+        } else if (random < 96) {   //71~95%
+            String[] boxArr = {"70%經驗藥水 X 1", "回復卷軸 X 1", "大復活丸 X 1", "防壞裝木偶 X 1"};
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
             int sum = i % boxArr.length;
@@ -41,14 +41,14 @@ public class CowBoy {
             RandomNumber randomNumber2 = new RandomNumber();
             int i = randomNumber2.getNumber();
             new Thread(playMP).start();
-            if (i < 71) { //1~70%
-                String[] boxArr = {"獸寵馬刺 X 1", "獸寵胸飾 X 1", "獸寵韁繩 X 1"};
+            if (i > 30) { //30~100%
+                String[] boxArr = {"獸寵馬鐙 X 1", "獸寵馬刺 X 1", "獸寵胸飾 X 1", "獸寵韁繩 X 1"};
                 int sum = i % boxArr.length;
                 message = boxArr[sum];
-            } else if (i < 86) {    //71~85%
+            } else if (i < 16) {    //1~15%
                 String[] boxArr = {"獸寵面罩 X 1"};
                 message = boxArr[0];
-            } else {    //86~100%
+            } else {    //16~30%
                 String[] boxArr = {"獸寵戰輪 X 1"};
                 message = boxArr[0];
             }
