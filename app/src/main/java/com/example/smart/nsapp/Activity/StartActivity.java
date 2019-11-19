@@ -11,6 +11,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.smart.nsapp.R;
+import com.google.firebase.FirebaseApp;
+
 import pl.droidsonroids.gif.GifImageView;
 
 public class StartActivity extends AppCompatActivity {

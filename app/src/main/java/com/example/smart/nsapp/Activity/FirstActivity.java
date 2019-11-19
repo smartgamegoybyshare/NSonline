@@ -47,8 +47,13 @@ import com.example.smart.nsapp.ViewPager.CombineView;
 import com.example.smart.nsapp.ViewPager.SetPagerAdapter;
 import com.example.smart.nsapp.ViewPager.SetViewPager;
 import com.example.smart.nsapp.ViewPager.VideoView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,6 +88,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //FirebaseApp.initializeApp(this);
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
@@ -99,6 +105,7 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
     private void startpage() {
         setContentView(R.layout.activity_main);
 
+        setFCM();
         downloadStatus.setListener(this);
         new Thread(mpplayer).start();   //程式開啟即撥放背景音樂，縮放回來後亦同
         new Thread(versioncontrol).start();
@@ -291,6 +298,27 @@ public class FirstActivity extends AppCompatActivity implements NavigationView.O
         SpannableString spanString1 = new SpannableString(navigationView.getMenu().
                 findItem(R.id.homepage).getTitle().toString());
         spanString1.setSpan(new ForegroundColorSpan(Color.GRAY), 0, spanString1.length(), 0);
+    }
+
+    private void setFCM(){
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.e(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = Objects.requireNonNull(task.getResult()).getToken();
+
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt, token);
+                        Log.e(TAG, msg);
+                        //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override

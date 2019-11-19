@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "415727298448",
+    "firebase_url": "https://nsonline-b38d6.firebaseio.com",
+    "project_id": "nsonline-b38d6",
+    "storage_bucket": "nsonline-b38d6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:415727298448:android:10a7b6f1d991916db37515",
+        "android_client_info": {
+          "package_name": "com.smartgamegoy.nsonline.nsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "415727298448-g1pnb99iitccdc7g7m22jcpskv5lbbov.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartgamegoy.nsonline.nsapp",
+            "certificate_hash": "91442466dd50f699f9fa40bd88152bf886b3bd7a"
+          }
+        },
+        {
+          "client_id": "415727298448-lgbbnh643n9rm3j7g56gdghrus8po4r7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpdDOE0TERn-zl7n4e_au6nevOV1-ewHI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "415727298448-lgbbnh643n9rm3j7g56gdghrus8po4r7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

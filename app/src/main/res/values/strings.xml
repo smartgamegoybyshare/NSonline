@@ -1,4 +1,6 @@
 <resources>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="msg_token_fmt" translatable="false">InstanceID Token: %s</string>
     <string name="app_name">女神online</string>
     <string name="app_bar">首頁</string>
     <string name="stop">停止音樂</string>
